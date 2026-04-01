@@ -1,0 +1,49 @@
+<div class="card">
+    <div id="box-auth">
+        <h2>🏗 Xây Tháp STEM</h2>
+        <input type="text" id="u-name" placeholder="Họ tên em">
+        <input type="password" id="u-pass" placeholder="Mật khẩu cực khó">
+        
+        <label>Chọn nhóm của em:</label>
+        <select id="group-select" style="width:100%; padding:10px; margin:10px 0; border-radius:10px;">
+            <option value="Group1">Nhóm 1</option>
+            <option value="Group2">Nhóm 2</option>
+            <option value="Group3">Nhóm 3</option>
+            <option value="Group4">Nhóm 4</option>
+        </select>
+
+        <button class="btn-create" onclick="submitPass()">XÂY NHÀ 🧱</button>
+    </div>
+</div>
+
+<script>
+    // ... (Firebase Config dán y hệt máy giáo viên) ...
+
+    function calculateScore(p) {
+        let s = p.length * 40;
+        if (/[A-Z]/.test(p)) s += 150;
+        if (/[0-9]/.test(p)) s += 150;
+        if (/[^A-Za-z0-9]/.test(p)) s += 300;
+        return Math.min(s, 1000);
+    }
+
+    function submitPass() {
+        const name = document.getElementById('u-name').value.trim();
+        const pass = document.getElementById('u-pass').value.trim();
+        const group = document.getElementById('group-select').value;
+
+        if(!name || !pass) return alert("Nhập đủ tên và mật khẩu!");
+
+        // Kiểm tra xem game có đang chạy không
+        db.ref('game_config/status').once('value', snap => {
+            if(snap.val() !== 'playing') return alert("Trò chơi chưa bắt đầu hoặc đã kết thúc!");
+
+            let score = calculateScore(pass);
+            // Lưu điểm vào nhóm
+            db.ref('game_scores/' + group).push(score).then(() => {
+                alert(`Tuyệt vời! Em đóng góp ${score} điểm cho ${group}`);
+                document.getElementById('u-pass').value = ""; // Xóa pass để nộp cái khác
+            });
+        });
+    }
+</script>

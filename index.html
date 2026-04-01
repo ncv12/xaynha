@@ -2,98 +2,87 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>STEM GAME: Quản Lý Xây Tháp</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEM GAME: Học Sinh Xây Tháp</title>
     <style>
-        :root { --bg-color: #a2d2ff; --ground: #588157; --accent: #4361ee; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg-color); margin: 0; overflow: hidden; text-align: center; }
-        
-        /* Bảng điều khiển */
-        .setup-panel { 
-            background: white; padding: 20px; display: flex; flex-wrap: wrap; 
-            justify-content: center; gap: 15px; align-items: center; 
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); position: relative; z-index: 10;
-        }
-        .group-names-config { 
-            display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); 
-            gap: 10px; width: 100%; max-width: 800px; margin-top: 10px; padding: 10px;
-            background: #f8f9fa; border-radius: 8px;
-        }
-        
-        /* Khu vực trò chơi */
-        .game-area { 
-            display: flex; justify-content: space-around; align-items: flex-end; 
-            height: 65vh; padding: 0 40px; margin-top: 20px; 
-            border-bottom: 15px solid var(--ground); position: relative;
-        }
-        
-        .tower-container { display: flex; flex-direction: column; align-items: center; width: 150px; position: relative; }
-        .tower-stack { 
-            display: flex; flex-direction: column-reverse; width: 80px; 
-            border-bottom: 4px solid #333; min-height: 5px;
-        }
-        .block { 
-            width: 100%; height: 20px; background: #6d6875; border: 1px solid #3d3d3d; 
-            border-radius: 3px; margin-bottom: 2px; animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: linear-gradient(to bottom, #8e9aaf, #6d6875);
-        }
-        @keyframes pop { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-
-        .tower-label { 
-            margin-top: 15px; font-weight: bold; background: white; 
-            padding: 8px 12px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            min-width: 100px; line-height: 1.4;
-        }
-        
-        #timer { font-size: 60px; font-weight: bold; color: #d00000; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin: 10px 0; }
-        
-        /* Chiến thắng */
-        #winner-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.8); display: none; flex-direction: column;
-            justify-content: center; align-items: center; z-index: 1000; color: gold;
-        }
-        .winner-content { animation: winnerAnim 1s infinite alternate; }
-        @keyframes winnerAnim { from { transform: scale(1); } to { transform: scale(1.1); } }
-
-        input { padding: 8px; border-radius: 6px; border: 1px solid #ccc; width: 100px; outline: none; }
-        button { padding: 10px 20px; cursor: pointer; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: bold; transition: 0.2s; }
-        button:hover { opacity: 0.9; transform: translateY(-2px); }
+        :root { --primary: #4361ee; --success: #2ec4b6; --bg: #f8f9fa; --text: #2b2d42; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; padding: 15px; box-sizing: border-box; }
+        .card { background: white; padding: 2rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        h2 { color: var(--text); margin-bottom: 1.5rem; font-size: 1.8rem; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .input-group { text-align: left; margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 6px; font-weight: bold; color: #4a4e69; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #e9ecef; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); }
+        button { width: 100%; padding: 16px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1.1rem; margin-top: 1rem; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-reg { background: var(--primary); }
+        .btn-login { background: #3a0ca3; }
+        .btn-build { background: var(--success); }
+        .btn-build:disabled { background: #ccc; cursor: not-allowed; box-shadow: none; opacity: 0.6; }
+        .hidden { display: none; }
+        .switch { margin-top: 20px; font-size: 0.9rem; color: #6c757d; }
+        .switch a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        .score-preview { background: #f1f8ff; padding: 12px; border-radius: 12px; margin: 15px 0; color: var(--primary); border: 1px dashed var(--primary); }
+        #status-info { color: #d00000; font-weight: bold; margin: 10px 0; font-size: 0.9rem; min-height: 20px; }
     </style>
 </head>
 <body>
 
-<!-- Âm thanh -->
-<audio id="build-sound" src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3"></audio>
-<audio id="win-sound" src="https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3"></audio>
-
-<div class="setup-panel" id="setup">
-    <div>
-        Số nhóm: <input type="number" id="num-groups" value="4" min="1" max="10" onchange="renderNameInputs()">
-        Thời gian (giây): <input type="number" id="game-time" value="120">
-        <button onclick="startGame()">🚀 BẮT ĐẦU</button>
-        <button style="background:#ef233c" onclick="resetGame()">🗑 RESET</button>
+<div class="card">
+    <!-- KHỐI 1: ĐĂNG KÝ -->
+    <div id="box-reg">
+        <h2>📝 Tạo Lượt Xây</h2>
+        <div class="input-group">
+            <label>Tên nhân vật (Ví dụ: An_1):</label>
+            <input type="text" id="reg-name" placeholder="Nhập tên em...">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu (Khó = Tháp cao):</label>
+            <input type="password" id="reg-pass" placeholder="Mật khẩu của em...">
+        </div>
+        <button class="btn-reg" onclick="handleReg()">1. Tạo mật khẩu</button>
+        <div class="switch">Đã có lượt rồi? <a href="#" onclick="showBox('login')">Đăng nhập ngay</a></div>
     </div>
-    <div class="group-names-config" id="names-config">
-        <!-- Tên nhóm sẽ render ở đây -->
+
+    <!-- KHỐI 2: ĐĂNG NHẬP -->
+    <div id="box-login" class="hidden">
+        <h2>🔐 Đăng Nhập</h2>
+        <div class="input-group">
+            <label>Tên đã đăng ký:</label>
+            <input type="text" id="login-name">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu:</label>
+            <input type="password" id="login-pass">
+        </div>
+        <button class="btn-login" onclick="handleLogin()">2. Kiểm tra mật khẩu</button>
+        <div class="switch"><a href="#" onclick="showBox('reg')">Quay lại Đăng ký</a></div>
+    </div>
+
+    <!-- KHỐI 3: CHỌN NHÓM & XÂY -->
+    <div id="box-game" class="hidden">
+        <h2>🏗 Xây Tháp</h2>
+        <p>Thợ xây: <b id="user-display">---</b></p>
+        <div class="score-preview">
+            Số gạch của em: <b id="score-val" style="font-size: 1.5rem;">0</b> 🧱
+        </div>
+        
+        <div class="input-group">
+            <label>Chọn nhóm của em:</label>
+            <select id="group-id">
+                <option value="">Chờ danh sách từ GV...</option>
+            </select>
+        </div>
+
+        <div id="status-info"></div>
+        <button class="btn-build" id="build-btn" onclick="handleBuild()">3. ĐẶT GẠCH XÂY NHÀ 🚀</button>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 15px;">Xây xong hãy tạo thêm lượt để tháp cao hơn nữa!</p>
     </div>
 </div>
 
-<div id="timer">02:00</div>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push, get, child, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-<div class="game-area" id="stage"></div>
-
-<div id="winner-overlay">
-    <div class="winner-content">
-        <h1>🏆 CHIẾN THẮNG THUỘC VỀ 🏆</h1>
-        <h2 id="winner-name" style="font-size: 80px; margin: 20px 0;">NHÓM 1</h2>
-        <button onclick="location.reload()" style="background: white; color: black;">CHƠI LẠI</button>
-    </div>
-</div>
-
-<script>
     const firebaseConfig = {
         apiKey: "AIzaSyCep66eHM3yZWzPy5TPQvKrLy2ZkzH6OqU",
         authDomain: "cdsl3b13-19b3c.firebaseapp.com",
@@ -104,138 +93,97 @@
         appId: "1:189558120626:web:17b402865414c96ce2a9ab"
     };
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    let timeLeft = 0;
-    let timerInterval;
-    let groupMap = {};
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let currentUser = "";
+    let currentScore = 0;
+    let gameStatus = "ready";
 
-    // Tạo các ô nhập tên nhóm
-    function renderNameInputs() {
-        const num = document.getElementById('num-groups').value;
-        const container = document.getElementById('names-config');
-        container.innerHTML = '';
-        for(let i=1; i<=num; i++) {
-            container.innerHTML += `<div>G${i}: <input type="text" id="name-G${i}" value="Nhóm ${i}" style="width:100px"></div>`;
-        }
-    }
-    renderNameInputs();
+    // --- LẮNG NGHE TÊN NHÓM VÀ TRẠNG THÁI TỪ GV ---
+    onValue(ref(db, 'game_config'), (snap) => {
+        const data = snap.val();
+        const select = document.getElementById('group-id');
+        const info = document.getElementById('status-info');
+        const btn = document.getElementById('build-btn');
 
-    function startGame() {
-        const num = document.getElementById('num-groups').value;
-        const time = document.getElementById('game-time').value;
-        
-        // Lưu cấu hình tên nhóm
-        groupMap = {};
-        for(let i=1; i<=num; i++) {
-            const val = document.getElementById(`name-G${i}`).value || `Nhóm ${i}`;
-            groupMap[`Group${i}`] = val;
-        }
-
-        db.ref('game_config').set({ 
-            num: num, 
-            status: 'playing',
-            groupNames: groupMap 
-        });
-
-        timeLeft = parseInt(time);
-        document.getElementById('setup').style.display = 'none';
-        
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            let min = Math.floor(timeLeft / 60);
-            let sec = timeLeft % 60;
-            document.getElementById('timer').innerText = `${min}:${sec < 10 ? '0'+sec : sec}`;
+        if (data && data.groupNames) {
+            gameStatus = data.status;
             
-            if(timeLeft <= 0) endGame();
-        }, 1000);
-    }
-
-    function endGame() {
-        clearInterval(timerInterval);
-        db.ref('game_config/status').set('ended');
-        
-        // Tìm nhóm thắng cuộc
-        db.ref('game_scores').once('value', snap => {
-            let maxScore = -1;
-            let winnerId = '';
-            
-            const numGroups = document.getElementById('num-groups').value;
-            for(let i=1; i<=numGroups; i++) {
-                let score = 0;
-                if(snap.hasChild('Group'+i)) {
-                    snap.child('Group'+i).forEach(p => score += p.val());
-                }
-                if(score > maxScore) {
-                    maxScore = score;
-                    winnerId = 'Group'+i;
-                }
+            // Vẽ lại danh sách nhóm (Lấy đúng tên thầy đã nhập)
+            select.innerHTML = '';
+            for (const [id, name] of Object.entries(data.groupNames)) {
+                let opt = document.createElement('option');
+                opt.value = id;
+                opt.innerText = name;
+                select.appendChild(opt);
             }
 
-            const winName = groupMap[winnerId] || "Không có";
-            document.getElementById('winner-name').innerText = winName;
-            document.getElementById('winner-overlay').style.display = 'flex';
-            document.getElementById('win-sound').play();
-            
-            // Pháo hoa
-            const duration = 5 * 1000;
-            const end = Date.now() + duration;
-            (function frame() {
-                confetti({ particleCount: 3, angle: 60, spread: 55, origin: { x: 0 } });
-                confetti({ particleCount: 3, angle: 120, spread: 55, origin: { x: 1 } });
-                if (Date.now() < end) requestAnimationFrame(frame);
-            }());
-        });
-    }
-
-    function resetGame() {
-        if(confirm("Xóa hết dữ liệu để bắt đầu trò chơi mới?")) {
-            db.ref('game_scores').remove();
-            db.ref('users').remove();
-            db.ref('game_config').set({ status: 'ready' });
-            location.reload();
-        }
-    }
-
-    // Lắng nghe điểm số để vẽ tháp
-    db.ref('game_scores').on('value', snap => {
-        const stage = document.getElementById('stage');
-        const numGroups = document.getElementById('num-groups').value;
-        stage.innerHTML = '';
-        
-        // Chỉ kêu khi có dữ liệu mới thực sự
-        if(!isFirstLoad) document.getElementById('build-sound').play();
-
-        for(let i=1; i<=numGroups; i++) {
-            let score = 0;
-            if(snap.hasChild('Group'+i)) {
-                snap.child('Group'+i).forEach(p => score += p.val());
+            // Quản lý nút bấm dựa trên trạng thái game
+            if(gameStatus === 'playing') {
+                info.innerText = "";
+                btn.disabled = false;
+            } else if (gameStatus === 'ended') {
+                info.innerText = "TRÒ CHƠI ĐÃ KẾT THÚC!";
+                btn.disabled = true;
+            } else {
+                info.innerText = "Chờ thầy/cô bấm BẮT ĐẦU nhé!";
+                btn.disabled = true;
             }
-
-            const container = document.createElement('div');
-            container.className = 'tower-container';
-            
-            const stack = document.createElement('div');
-            stack.className = 'tower-stack';
-            
-            // 150 điểm = 1 tầng gạch
-            let floors = Math.floor(score / 150);
-            for(let f=0; f<floors; f++) {
-                const block = document.createElement('div');
-                block.className = 'block';
-                stack.appendChild(block);
-            }
-
-            container.appendChild(stack);
-            
-            const nameDisp = groupMap[`Group${i}`] || `Nhóm ${i}`;
-            container.innerHTML += `<div class="tower-label"><b>${nameDisp}</b><br><span style="color:#4361ee">${score}đ</span></div>`;
-            stage.appendChild(container);
         }
     });
 
-    let isFirstLoad = true;
-    setTimeout(() => isFirstLoad = false, 2000);
+    window.showBox = (mode) => {
+        document.getElementById('box-reg').classList.toggle('hidden', mode !== 'reg');
+        document.getElementById('box-login').classList.toggle('hidden', mode !== 'login');
+        document.getElementById('box-game').classList.toggle('hidden', mode !== 'game');
+    };
+
+    function calculateScore(p) {
+        if(!p) return 0;
+        let s = p.length * 45;
+        if (/[A-Z]/.test(p)) s += 150;
+        if (/[0-9]/.test(p)) s += 150;
+        if (/[^A-Za-z0-9]/.test(p)) s += 300;
+        return Math.min(s, 1000);
+    }
+
+    window.handleReg = async () => {
+        const name = document.getElementById('reg-name').value.trim();
+        const pass = document.getElementById('reg-pass').value.trim();
+        if(!name || !pass) return alert("Nhập đủ tên và mật khẩu nhé!");
+        await set(ref(db, 'users/' + name), { password: pass });
+        alert("Đã tạo xong! Giờ hãy Đăng nhập.");
+        showBox('login');
+        document.getElementById('login-name').value = name;
+    };
+
+    window.handleLogin = async () => {
+        const name = document.getElementById('login-name').value.trim();
+        const pass = document.getElementById('login-pass').value.trim();
+        const snap = await get(child(ref(db), `users/${name}`));
+        if (snap.exists() && snap.val().password === pass) {
+            currentUser = name;
+            currentScore = calculateScore(pass);
+            document.getElementById('user-display').innerText = name;
+            document.getElementById('score-val').innerText = currentScore;
+            showBox('game');
+        } else {
+            alert("Tên hoặc mật khẩu chưa đúng!");
+        }
+    };
+
+    window.handleBuild = async () => {
+        const gid = document.getElementById('group-id').value;
+        if(gameStatus !== 'playing') return alert("Chưa bắt đầu xây đâu!");
+        
+        await push(ref(db, 'game_scores/' + gid), currentScore);
+        alert(`🎉 Đã thêm ${currentScore} điểm cho nhóm!`);
+        
+        // Reset để học sinh tạo mật khẩu mới
+        document.getElementById('reg-name').value = "";
+        document.getElementById('reg-pass').value = "";
+        showBox('reg');
+    };
 </script>
 </body>
 </html>

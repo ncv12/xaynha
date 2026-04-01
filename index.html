@@ -1,25 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>STEM GAME: Xây Tháp Bảo Mật</title>
+    <style>
+        :root { --primary: #4361ee; --secondary: #3f37c9; --bg: #f0f2f5; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; text-align: center; }
+        h2 { color: #2b2d42; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #edf2f4; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 14px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px; }
+        .btn-reg { background: var(--primary); }
+        .btn-login { background: var(--secondary); }
+        .btn-build { background: #7209b7; }
+        .hidden { display: none; }
+        .switch { margin-top: 15px; font-size: 14px; color: #666; }
+        .switch a { color: var(--primary); text-decoration: none; font-weight: bold; }
+        #msg { margin-top: 10px; font-size: 14px; min-height: 20px; }
+    </style>
+</head>
+<body>
+
 <div class="card">
-    <div id="box-auth">
+    <div id="box-reg">
+        <h2>📝 Đăng Ký</h2>
+        <input type="text" id="reg-name" placeholder="Họ và tên của em">
+        <input type="password" id="reg-pass" placeholder="Mật khẩu bảo mật">
+        <button class="btn-reg" onclick="handleReg()">Tạo tài khoản</button>
+        <div class="switch">Đã có tài khoản? <a href="#" onclick="showBox('login')">Đăng nhập</a></div>
+    </div>
+
+    <div id="box-login" class="hidden">
+        <h2>🔐 Đăng Nhập</h2>
+        <input type="text" id="login-name" placeholder="Tên đã đăng ký">
+        <input type="password" id="login-pass" placeholder="Mật khẩu">
+        <button class="btn-login" onclick="handleLogin()">Vào hệ thống</button>
+        <div class="switch"><a href="#" onclick="showBox('reg')">Quay lại Đăng ký</a></div>
+    </div>
+
+    <div id="box-game" class="hidden">
         <h2>🏗 Xây Tháp STEM</h2>
-        <input type="text" id="u-name" placeholder="Họ tên em">
-        <input type="password" id="u-pass" placeholder="Mật khẩu cực khó">
+        <p>Chào thợ xây: <b id="user-name" style="color:var(--primary)"></b></p>
         
-        <label>Chọn nhóm của em:</label>
-        <select id="group-select" style="width:100%; padding:10px; margin:10px 0; border-radius:10px;">
+        <label style="font-size: 14px; color: #888; display: block; text-align: left;">Chọn nhóm của em:</label>
+        <select id="group-id">
             <option value="Group1">Nhóm 1</option>
             <option value="Group2">Nhóm 2</option>
             <option value="Group3">Nhóm 3</option>
             <option value="Group4">Nhóm 4</option>
+            <option value="Group5">Nhóm 5</option>
         </select>
 
-        <button class="btn-create" onclick="submitPass()">XÂY NHÀ 🧱</button>
+        <input type="password" id="build-pass" placeholder="Nhập mật khẩu để xây nhà">
+        <button class="btn-build" onclick="handleBuild()">XÂY NHÀ 🧱</button>
     </div>
+    <div id="msg"></div>
 </div>
 
-<script>
-    // ... (Firebase Config dán y hệt máy giáo viên) ...
+<script type="module">
+    // Import đúng chuẩn Firebase v9+ (Phù hợp với ảnh image_a5e3f9.png của bạn)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, set, push, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-    function calculateScore(p) {
+    const firebaseConfig = {
+        apiKey: "AIzaSyCep66eHM3yZWzPy5TPQvKrLy2ZkzH6OqU",
+        authDomain: "cdsl3b13-19b3c.firebaseapp.com",
+        databaseURL: "https://cdsl3b13-19b3c-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "cdsl3b13-19b3c",
+        storageBucket: "cdsl3b13-19b3c.firebasestorage.app",
+        messagingSenderId: "189558120626",
+        appId: "1:189558120626:web:17b402865414c96ce2a9ab"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    let currentUser = "";
+
+    // Chuyển đổi giao diện
+    window.showBox = (mode) => {
+        document.getElementById('box-reg').classList.toggle('hidden', mode !== 'reg');
+        document.getElementById('box-login').classList.toggle('hidden', mode !== 'login');
+        document.getElementById('box-game').classList.toggle('hidden', mode !== 'game');
+    };
+
+    // Chấm điểm mật khẩu
+    function getScore(p) {
+        if(!p) return 0;
         let s = p.length * 40;
         if (/[A-Z]/.test(p)) s += 150;
         if (/[0-9]/.test(p)) s += 150;
@@ -27,23 +94,51 @@
         return Math.min(s, 1000);
     }
 
-    function submitPass() {
-        const name = document.getElementById('u-name').value.trim();
-        const pass = document.getElementById('u-pass').value.trim();
-        const group = document.getElementById('group-select').value;
+    // Đăng ký
+    window.handleReg = async () => {
+        const name = document.getElementById('reg-name').value.trim();
+        const pass = document.getElementById('reg-pass').value.trim();
+        if(!name || !pass) return alert("Điền đầy đủ thông tin em nhé!");
+        
+        await set(ref(db, 'users/' + name), { password: pass });
+        alert("Đăng ký thành công! Hãy đăng nhập nhé.");
+        showBox('login');
+    };
 
-        if(!name || !pass) return alert("Nhập đủ tên và mật khẩu!");
+    // Đăng nhập
+    window.handleLogin = async () => {
+        const name = document.getElementById('login-name').value.trim();
+        const pass = document.getElementById('login-pass').value.trim();
+        
+        const dbRef = ref(db);
+        const snapshot = await get(child(dbRef, `users/${name}`));
+        
+        if (snapshot.exists() && snapshot.val().password === pass) {
+            currentUser = name;
+            document.getElementById('user-name').innerText = name;
+            showBox('game');
+        } else {
+            alert("Sai tên hoặc mật khẩu rồi!");
+        }
+    };
 
-        // Kiểm tra xem game có đang chạy không
-        db.ref('game_config/status').once('value', snap => {
-            if(snap.val() !== 'playing') return alert("Trò chơi chưa bắt đầu hoặc đã kết thúc!");
+    // Xây nhà (Gửi điểm qua máy GV)
+    window.handleBuild = async () => {
+        const pass = document.getElementById('build-pass').value.trim();
+        const group = document.getElementById('group-id').value;
 
-            let score = calculateScore(pass);
-            // Lưu điểm vào nhóm
-            db.ref('game_scores/' + group).push(score).then(() => {
-                alert(`Tuyệt vời! Em đóng góp ${score} điểm cho ${group}`);
-                document.getElementById('u-pass').value = ""; // Xóa pass để nộp cái khác
-            });
-        });
-    }
+        if(!pass) return alert("Nhập mật khẩu để lấy gạch xây nhà!");
+
+        // Kiểm tra xem game có đang mở không
+        const configSnap = await get(ref(db, 'game_config/status'));
+        if(configSnap.val() !== 'playing') return alert("Trò chơi chưa bắt đầu hoặc đã kết thúc!");
+
+        let score = getScore(pass);
+        await push(ref(db, 'game_scores/' + group), score);
+        
+        document.getElementById('msg').innerHTML = `<b style="color:green">🧱 +${score} điểm cho ${group}!</b>`;
+        document.getElementById('build-pass').value = ""; // Xóa để nhập cái mới
+    };
 </script>
+</body>
+</html>

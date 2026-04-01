@@ -5,61 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>STEM GAME: Xây Tháp Bảo Mật</title>
     <style>
-        :root { --primary: #4361ee; --secondary: #3f37c9; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
-        .card { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); width: 100%; max-width: 380px; text-align: center; }
-        h2 { color: #2b2d42; margin-bottom: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 2px solid #edf2f4; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
-        button { width: 100%; padding: 14px; border: none; border-radius: 10px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; margin-top: 10px; font-size: 16px; }
+        :root { --primary: #4361ee; --success: #2ec4b6; --bg: #f8f9fa; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+        .card { background: white; padding: 2rem; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; transition: 0.3s; }
+        h2 { color: #2b2d42; margin-bottom: 1.5rem; font-size: 1.8rem; }
+        .input-group { text-align: left; margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; color: #4a4e69; font-size: 0.9rem; }
+        input, select { width: 100%; padding: 14px; border: 2px solid #e9ecef; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; transition: 0.2s; }
+        input:focus { border-color: var(--primary); }
+        button { width: 100%; padding: 16px; border: none; border-radius: 12px; color: white; font-weight: bold; cursor: pointer; transition: 0.3s; font-size: 1.1rem; margin-top: 1rem; box-shadow: 0 4px 15px rgba(67, 97, 238, 0.3); }
         .btn-reg { background: var(--primary); }
-        .btn-login { background: var(--secondary); }
-        .btn-build { background: #7209b7; }
+        .btn-login { background: #3a0ca3; }
+        .btn-build { background: var(--success); box-shadow: 0 4px 15px rgba(46, 196, 182, 0.3); }
         .hidden { display: none; }
-        .switch { margin-top: 15px; font-size: 14px; color: #666; }
+        .switch { margin-top: 20px; font-size: 0.9rem; color: #6c757d; }
         .switch a { color: var(--primary); text-decoration: none; font-weight: bold; }
-        #msg { margin-top: 10px; font-size: 14px; min-height: 20px; }
+        .status-msg { margin-top: 15px; padding: 10px; border-radius: 8px; font-weight: bold; }
+        .score-preview { background: #f1f8ff; padding: 10px; border-radius: 10px; margin: 10px 0; color: var(--primary); }
     </style>
 </head>
 <body>
 
 <div class="card">
+    <!-- Bước 1: Đăng ký tài khoản (Tạo lượt chơi mới) -->
     <div id="box-reg">
-        <h2>📝 Đăng Ký</h2>
-        <input type="text" id="reg-name" placeholder="Họ và tên của em">
-        <input type="password" id="reg-pass" placeholder="Mật khẩu bảo mật">
-        <button class="btn-reg" onclick="handleReg()">Tạo tài khoản</button>
-        <div class="switch">Đã có tài khoản? <a href="#" onclick="showBox('login')">Đăng nhập</a></div>
+        <h2>📝 Tạo Lượt Xây</h2>
+        <div class="input-group">
+            <label>Tên nhân vật (hoặc số thứ tự):</label>
+            <input type="text" id="reg-name" placeholder="Ví dụ: Tuan_1, Tuan_2...">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu (Càng khó tháp càng cao):</label>
+            <input type="password" id="reg-pass" placeholder="Ít nhất 8 ký tự, có số, chữ hoa...">
+        </div>
+        <button class="btn-reg" onclick="handleReg()">1. Xác nhận Mật khẩu</button>
+        <div class="switch">Đã tạo xong? <a href="#" onclick="showBox('login')">Đăng nhập để xây</a></div>
     </div>
 
+    <!-- Bước 2: Đăng nhập -->
     <div id="box-login" class="hidden">
         <h2>🔐 Đăng Nhập</h2>
-        <input type="text" id="login-name" placeholder="Tên đã đăng ký">
-        <input type="password" id="login-pass" placeholder="Mật khẩu">
-        <button class="btn-login" onclick="handleLogin()">Vào hệ thống</button>
-        <div class="switch"><a href="#" onclick="showBox('reg')">Quay lại Đăng ký</a></div>
+        <div class="input-group">
+            <label>Tên đã đăng ký:</label>
+            <input type="text" id="login-name">
+        </div>
+        <div class="input-group">
+            <label>Mật khẩu:</label>
+            <input type="password" id="login-pass">
+        </div>
+        <button class="btn-login" onclick="handleLogin()">2. Kiểm tra danh tính</button>
+        <div class="switch"><a href="#" onclick="showBox('reg')">Chưa có tài khoản? Đăng ký</a></div>
     </div>
 
+    <!-- Bước 3: Chọn nhóm và Xây dựng (Không cần nhập lại pass) -->
     <div id="box-game" class="hidden">
-        <h2>🏗 Xây Tháp STEM</h2>
-        <p>Chào thợ xây: <b id="user-name" style="color:var(--primary)"></b></p>
+        <h2>🏗 Đang Xây Dựng</h2>
+        <p>Thợ xây: <b id="user-display"></b></p>
+        <div class="score-preview">
+            Điểm gạch của bạn: <b id="score-val">0</b> 🧱
+        </div>
         
-        <label style="font-size: 14px; color: #888; display: block; text-align: left;">Chọn nhóm của em:</label>
-        <select id="group-id">
-            <option value="Group1">Nhóm 1</option>
-            <option value="Group2">Nhóm 2</option>
-            <option value="Group3">Nhóm 3</option>
-            <option value="Group4">Nhóm 4</option>
-            <option value="Group5">Nhóm 5</option>
-        </select>
+        <div class="input-group">
+            <label>Chọn nhóm của em:</label>
+            <select id="group-id">
+                <option value="Group1">Nhóm 1</option>
+                <option value="Group2">Nhóm 2</option>
+                <option value="Group3">Nhóm 3</option>
+                <option value="Group4">Nhóm 4</option>
+                <option value="Group5">Nhóm 5</option>
+            </select>
+        </div>
 
-        <input type="password" id="build-pass" placeholder="Nhập mật khẩu để xây nhà">
-        <button class="btn-build" onclick="handleBuild()">XÂY NHÀ 🧱</button>
+        <button class="btn-build" onclick="handleBuild()">3. ĐẶT GẠCH XÂY THÁP 🚀</button>
+        <p style="font-size: 0.8rem; color: #888; margin-top: 10px;">Sau khi xây, bạn sẽ quay lại trang Đăng ký để tạo thêm lượt mới!</p>
     </div>
-    <div id="msg"></div>
+    
+    <div id="msg" class="status-msg"></div>
 </div>
 
 <script type="module">
-    // Import đúng chuẩn Firebase v9+ (Phù hợp với ảnh image_a5e3f9.png của bạn)
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getDatabase, ref, set, push, get, child } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
@@ -76,68 +100,84 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
     let currentUser = "";
+    let currentScore = 0;
 
-    // Chuyển đổi giao diện
+    // Chuyển đổi Box UI
     window.showBox = (mode) => {
         document.getElementById('box-reg').classList.toggle('hidden', mode !== 'reg');
         document.getElementById('box-login').classList.toggle('hidden', mode !== 'login');
         document.getElementById('box-game').classList.toggle('hidden', mode !== 'game');
+        document.getElementById('msg').innerText = "";
     };
 
-    // Chấm điểm mật khẩu
-    function getScore(p) {
+    // Hàm tính điểm (Logic chính của game)
+    function calculateScore(p) {
         if(!p) return 0;
-        let s = p.length * 40;
-        if (/[A-Z]/.test(p)) s += 150;
-        if (/[0-9]/.test(p)) s += 150;
-        if (/[^A-Za-z0-9]/.test(p)) s += 300;
-        return Math.min(s, 1000);
+        let s = p.length * 45; // Tăng nhẹ điểm chiều dài
+        if (/[A-Z]/.test(p)) s += 150; // Chữ hoa
+        if (/[0-9]/.test(p)) s += 150; // Số
+        if (/[^A-Za-z0-9]/.test(p)) s += 300; // Ký tự đặc biệt
+        return Math.min(s, 1000); // Tối đa 1000 điểm/lượt
     }
 
-    // Đăng ký
+    // Đăng ký tài khoản (Lượt chơi mới)
     window.handleReg = async () => {
         const name = document.getElementById('reg-name').value.trim();
         const pass = document.getElementById('reg-pass').value.trim();
-        if(!name || !pass) return alert("Điền đầy đủ thông tin em nhé!");
         
-        await set(ref(db, 'users/' + name), { password: pass });
-        alert("Đăng ký thành công! Hãy đăng nhập nhé.");
-        showBox('login');
+        if(!name || !pass) return alert("Vui lòng nhập tên lượt chơi và mật khẩu!");
+        
+        try {
+            await set(ref(db, 'users/' + name), { password: pass });
+            alert("Đã ghi nhận mật khẩu! Bây giờ hãy Đăng nhập để xây nhà.");
+            showBox('login');
+            // Tự điền tên vào box login cho nhanh
+            document.getElementById('login-name').value = name;
+        } catch (e) { alert("Lỗi kết nối Firebase!"); }
     };
 
-    // Đăng nhập
+    // Đăng nhập (Lấy điểm từ mật khẩu đã lưu)
     window.handleLogin = async () => {
         const name = document.getElementById('login-name').value.trim();
         const pass = document.getElementById('login-pass').value.trim();
         
-        const dbRef = ref(db);
-        const snapshot = await get(child(dbRef, `users/${name}`));
-        
-        if (snapshot.exists() && snapshot.val().password === pass) {
-            currentUser = name;
-            document.getElementById('user-name').innerText = name;
-            showBox('game');
-        } else {
-            alert("Sai tên hoặc mật khẩu rồi!");
-        }
+        try {
+            const snapshot = await get(child(ref(db), `users/${name}`));
+            if (snapshot.exists() && snapshot.val().password === pass) {
+                currentUser = name;
+                currentScore = calculateScore(pass);
+                
+                document.getElementById('user-display').innerText = name;
+                document.getElementById('score-val').innerText = currentScore;
+                showBox('game');
+            } else {
+                alert("Sai tên lượt chơi hoặc mật khẩu không khớp!");
+            }
+        } catch (e) { alert("Lỗi khi đăng nhập!"); }
     };
 
-    // Xây nhà (Gửi điểm qua máy GV)
+    // Xây dựng (Gửi dữ liệu qua máy GV)
     window.handleBuild = async () => {
-        const pass = document.getElementById('build-pass').value.trim();
         const group = document.getElementById('group-id').value;
-
-        if(!pass) return alert("Nhập mật khẩu để lấy gạch xây nhà!");
-
-        // Kiểm tra xem game có đang mở không
-        const configSnap = await get(ref(db, 'game_config/status'));
-        if(configSnap.val() !== 'playing') return alert("Trò chơi chưa bắt đầu hoặc đã kết thúc!");
-
-        let score = getScore(pass);
-        await push(ref(db, 'game_scores/' + group), score);
         
-        document.getElementById('msg').innerHTML = `<b style="color:green">🧱 +${score} điểm cho ${group}!</b>`;
-        document.getElementById('build-pass').value = ""; // Xóa để nhập cái mới
+        try {
+            // Kiểm tra trạng thái game từ máy GV
+            const configSnap = await get(ref(db, 'game_config/status'));
+            if(configSnap.val() !== 'playing') {
+                return alert("Trò chơi chưa bắt đầu hoặc đã kết thúc!");
+            }
+
+            // Gửi điểm
+            await push(ref(db, 'game_scores/' + group), currentScore);
+            
+            alert(`🎉 Chúc mừng! Bạn đã đóng góp ${currentScore} điểm cho ${group}!`);
+            
+            // Reset về trang đăng ký để tạo lượt mới ngay lập tức
+            document.getElementById('reg-name').value = "";
+            document.getElementById('reg-pass').value = "";
+            showBox('reg');
+            
+        } catch (e) { alert("Không thể gửi điểm, vui lòng thử lại!"); }
     };
 </script>
 </body>
